@@ -92,25 +92,53 @@ class Model
 
     }
 
+    public static function group($arr)
+    {
+        if (count($arr) == 0) {
+            return "";
+        }
+        return " GROUP BY " . implode(",", $arr);
+
+    }
+
+    public static function limit($arr)
+    {
+        if (count($arr) == 0) {
+            return "";
+        }
+        return " LIMIT " . implode(",", $arr);
+    }
+
+    public static function count($data = [], $order = [], $limit = [])
+    {
+        if (is_numeric($data)) {
+            return static::findById($data);
+        }
+        $sql = "SELECT count(*) as c FROM `" . static::getTable() . "` " . static::where($data) . static::order($order) . static::limit($limit);
+
+        $sth = static::getConnection()->prepare($sql);
+        $sth->execute(static::conditions($data));
+        $result = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        return (int)$result[0]['c'];
+    }
+
     /**
      * @param array $data
      * @return static[]
      */
-    public static function find($data = [], $order = [])
+    public static function find($data = [], $order = [], $limit = [])
     {
         if (is_numeric($data)) {
-            return static::findOne([
-                static::getPK() => $data
-            ]);
+            return static::findById($data);
         }
-        $sql = "SELECT * FROM `" . static::getTable() . "` " . static::where($data) . static::order($order);
+        $sql = "SELECT * FROM `" . static::getTable() . "` " . static::where($data) . static::order($order) . static::limit($limit);
 
         $sth = static::getConnection()->prepare($sql);
         $sth->execute(static::conditions($data));
         return $sth->fetchAll(\PDO::FETCH_CLASS, get_called_class());
     }
 
-    public static function select($table, $data = [], $order = [], $fetchMethod = \PDO::FETCH_OBJ)
+    public static function select($table, $data = [], $order = [], $group = [], $limit = [], $fetchMethod = \PDO::FETCH_CLASS)
     {
 
         if (is_array($table)) {
@@ -119,19 +147,19 @@ class Model
         }
 
         if (stristr($table, " from ")) {
-            $sql = $table . " " . static::where($data) . static::order($order);
+            $sql = $table . " " . static::where($data) . static::group($group) . static::order($order) . static::limit($limit);
         } else {
-            $sql = "SELECT * FROM `" . $table . "` " . static::where($data) . static::order($data);
+            $sql = "SELECT * FROM `" . $table . "` " . static::where($data) . static::group($group) . static::order($order) . static::limit($limit);
         }
         $sth = static::getConnection()->prepare($sql);
 
         $sth->execute(static::conditions($data));
-        return $sth->fetchAll($fetchMethod);
+        return $sth->fetchAll($fetchMethod, get_called_class());
     }
 
-    public static function select1d($table, $data = [])
+    public static function select1d($table, $data = [], $order = [], $group = [])
     {
-        $data = static::select($table, $data, $order = [], \PDO::FETCH_ASSOC);
+        $data = static::select($table, $data, $order, $group, \PDO::FETCH_ASSOC);
         if (count($data) == 0) {
             return [];
         }
@@ -302,6 +330,9 @@ class Model
         return $count > 0;
     }
 
+    /**
+     * @return PDO
+     */
     public static function getConnection()
     {
         return Db::getInstance()->getConnection();
@@ -309,4 +340,5 @@ class Model
 
 
 }
+
 
