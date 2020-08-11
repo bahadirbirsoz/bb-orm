@@ -1,12 +1,12 @@
 <?php
 
-namespace Ayep;
+namespace BbOrm;
 
-class Db
+class Connection
 {
 
     /**
-     * @var Db
+     * @var Connection
      */
     static $instance;
 
@@ -15,13 +15,15 @@ class Db
      */
     private $conn;
 
+    private $locked = false;
+
     /**
-     * @return Db
+     * @return Connection
      */
 
     protected function __construct($host, $db, $user, $pass)
     {
-        if (!defined("Rumix_DB_LOCKED")) {
+        if (!$this->locked) {
             $this->conn = new \PDO('mysql:host=' . $host . ';dbname=' . $db . ";charset=utf8", $user, $pass);
         }
     }
@@ -31,7 +33,7 @@ class Db
      */
     public function getConnection()
     {
-        if (!defined("Rumix_DB_LOCKED")) {
+        if (!$this->locked) {
             return $this->conn;
         }
     }
@@ -39,11 +41,19 @@ class Db
     public static function getInstance()
     {
         if (!isset(static::$instance)) {
-            static::$instance = new Db(DB_HOST, DB_NAME, DB_USER, DB_PASS);
+            static::$instance = new Connection(
+                $_ENV['BBORM_HOSTNAME'],
+                $_ENV['BBORM_DATABASE'],
+                $_ENV['BBORM_USERNAME'],
+                $_ENV['BBORM_PASSWORD']);
         }
         return static::$instance;
     }
 
+    public function lock()
+    {
+        $this->locked = true;
+    }
 
 }
 

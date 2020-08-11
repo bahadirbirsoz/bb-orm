@@ -1,6 +1,6 @@
 <?php
 
-namespace Ayep;
+namespace BbOrm;
 
 class Model
 {
@@ -15,7 +15,7 @@ class Model
 
     public function __set($name, $val)
     {
-        $methodName = "set" . ucfirst(static::snakeToCamel($name));
+        $methodName = "set" . ucfirst(SyntaxHelper::snakeToCamel($name));
         if (method_exists($this, $methodName)) {
             $this->$methodName($val);
         } else {
@@ -27,37 +27,20 @@ class Model
     public static function getTable()
     {
         $arr = explode("\\", get_called_class());
-        return static::camelToSnake(array_pop($arr));
-    }
-
-
-    public function snakeToCamel($str)
-    {
-        return lcfirst(strtr(ucwords(strtr($str, ['_' => ' '])), [' ' => '']));
-    }
-
-
-    public static function camelToSnake($input)
-    {
-        preg_match_all('!([A-Z][A-Z0-9]*(?=$|[A-Z][a-z0-9])|[A-Za-z][a-z0-9]+)!', $input, $matches);
-        $ret = $matches[0];
-        foreach ($ret as &$match) {
-            $match = $match == strtoupper($match) ? strtolower($match) : lcfirst($match);
-        }
-        return implode('_', $ret);
+        return SyntaxHelper::camelToSnake(array_pop($arr));
     }
 
 
     public static function __callStatic($name, $arguments)
     {
         if (substr($name, 0, 6) == "findBy") {
-            $key = static::camelToSnake(substr($name, 6));
+            $key = SyntaxHelper::camelToSnake(substr($name, 6));
             return static::find([
                 $key => $arguments[0]
             ]);
         }
         if (substr($name, 0, 9) == "findOneBy") {
-            $key = static::camelToSnake(substr($name, 9));
+            $key = SyntaxHelper::camelToSnake(substr($name, 9));
             return static::findOne([
                 $key => $arguments[0]
             ]);
@@ -67,7 +50,8 @@ class Model
 
     public static function getPK()
     {
-        return static::getTable() . "_id";
+        return 'id';
+        //return static::getTable() . "_id";
     }
 
     public static function where($data)
@@ -138,15 +122,21 @@ class Model
         return $sth->fetchAll(\PDO::FETCH_CLASS, get_called_class());
     }
 
+    public static function raw($query)
+    {
+        $sth = static::getConnection()->prepare($query);
+        $sth->execute();
+        return $sth->fetchAll();
+    }
+
     public static function select($table, $data = [], $order = [], $group = [], $limit = [], $fetchMethod = \PDO::FETCH_CLASS)
     {
-
         if (is_array($table)) {
             $data = $table;
             $table = static::getTable();
         }
 
-        if (stristr($table, " from ")) {
+        if (stristr(trim($table), "select ")) {
             $sql = $table . " " . static::where($data) . static::group($group) . static::order($order) . static::limit($limit);
         } else {
             $sql = "SELECT * FROM `" . $table . "` " . static::where($data) . static::group($group) . static::order($order) . static::limit($limit);
@@ -157,7 +147,7 @@ class Model
         return $sth->fetchAll($fetchMethod, get_called_class());
     }
 
-    public static function select1d($table, $data = [], $order = [], $group = [])
+    public static function selectMap($table, $data = [], $order = [], $group = [])
     {
         $data = static::select($table, $data, $order, $group, \PDO::FETCH_ASSOC);
         if (count($data) == 0) {
@@ -331,11 +321,11 @@ class Model
     }
 
     /**
-     * @return PDO
+     * @return \PDO
      */
     public static function getConnection()
     {
-        return Db::getInstance()->getConnection();
+        return Connection::getInstance()->getConnection();
     }
 
 
