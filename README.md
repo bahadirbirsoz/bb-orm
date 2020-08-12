@@ -10,7 +10,7 @@ https://bb-orm.bahadirbirsoz.com/coverage
 ### Run Tests
 ```
 docker-compose build
-./runtests.sh
+docker-compose run bborm
 ```
 
 # Getting Started

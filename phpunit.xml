@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit bootstrap = "vendor/autoload.php"
+         backupGlobals               = "false"
+         backupStaticAttributes      = "false"
+         colors                      = "true"
+         convertErrorsToExceptions   = "true"
+         convertNoticesToExceptions  = "true"
+         convertWarningsToExceptions = "true"
+         processIsolation            = "false"
+         stopOnFailure               = "false"
+         syntaxCheck                 = "false">
+
+    <testsuites>
+        <testsuite name="BB-ORM Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src/</directory>
+        </whitelist>
+    </filter>
+
+    <php>
+        <env name="BBORM_HOSTNAME" value="localhost"/>
+        <env name="BBORM_USERNAME" value="root"/>
+        <env name="BBORM_PASSWORD" value="password"/>
+        <env name="BBORM_DATABASE" value="test"/>
+    </php>
+
+</phpunit>
