@@ -193,7 +193,7 @@ class Model
         return $arr[0];
     }
 
-    private function insertQueryString($data)
+    private static function insertQueryString($data)
     {
         $keys = array_keys($data);
         return "INSERT INTO `" . static::getTable() . "` " . static::getInsertCols($keys) . " VALUES " . static::getInsertValues($keys);
@@ -209,7 +209,7 @@ class Model
         return "( :" . implode(",:", $keys) . " )";
     }
 
-    private function updateQueryString($data)
+    private static function updateQueryString($data)
     {
         $pk = static::getPK();
         unset($data[$pk]);

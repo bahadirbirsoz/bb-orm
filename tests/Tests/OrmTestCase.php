@@ -17,5 +17,4 @@ class OrmTestCase extends TestCase
         parent::__construct($name, $data, $dataName);
     }
 
-
 }

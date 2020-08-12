@@ -80,4 +80,15 @@ left join category
         $this->assertIsNumeric($randomMetricObject->postCount);
     }
 
+
+    public function testCustomSelectMethod()
+    {
+        TestCaseSceneryFactory::resetDatabase();
+        $rows = DataRow::select("category left join post on post.category_id = category.id ");
+        $this->assertIsArray($rows);
+        $this->assertGreaterThan(10, $rows);
+    }
+
+
+
 }

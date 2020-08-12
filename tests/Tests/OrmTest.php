@@ -27,15 +27,6 @@ class OrmTest extends OrmTestCase
         $this->assertCount(5, $arr);
     }
 
-    public function testCustomSelectMethod()
-    {
-        TestCaseSceneryFactory::resetDatabase();
-        $rows = DataRow::select("category left join post on post.category_id = category.id ");
-        $this->assertIsArray($rows);
-        $this->assertGreaterThan(10, $rows);
-    }
-
-
     public function testCanDelete()
     {
         $category = EntityFactory::category();
