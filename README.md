@@ -7,6 +7,12 @@ https://bb-orm.bahadirbirsoz.com
 ### PHPUnit Code Coverage
 https://bb-orm.bahadirbirsoz.com/coverage 
 
+### Run Tests
+```
+docker-compose build
+docker-compose run bborm
+```
+
 # Getting Started
 
 ### Configuration

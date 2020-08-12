@@ -23,6 +23,7 @@ services:
       - .env
     volumes:
       - mysql:/var/lib/mysql
+      - ./config/test.sql:/docker-entrypoint-initdb.d/test.sql
     networks:
       - network
 
