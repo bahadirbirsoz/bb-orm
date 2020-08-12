@@ -2,31 +2,35 @@
 A simple lightweight ORM Library for PHP Projects.
 
 ### Project Page
-https://bb-orm.bahadirbirsoz.com 
+https://bb-orm.bahadirbirsoz.com
 
-### PHPUnit Code Coverage
-https://bb-orm.bahadirbirsoz.com/coverage 
-### Installation
-````
-composer require bahadirbirsoz/bb-orm
-````
-
-### To contribute and test
+https://github.com/bahadirbirsoz/bb-orm 
+ 
+### Contribution And Tests
 ```
 git clone https://github.com/bahadirbirsoz/bb-orm
 cd bb-orm
 docker-compose build
 docker-compose run bborm
 ```
+I have tested with php 7.2.2 and 7.4. You can run tests in your environment.
+
+### Code Coverage
+https://bb-orm.bahadirbirsoz.com/coverage
 
 # Getting Started
 
+### Installation
+````
+composer require bahadirbirsoz/bb-orm
+````
+
 ### Configuration
 ```
-    $_ENV['BBORM_USERNAME'] = 'root';
-    $_ENV['BBORM_PASSWORD'] = 'password';
-    $_ENV['BBORM_DATABASE'] = 'test';
-    $_ENV['BBORM_HOSTNAME'] = '127.0.0.1';
+$_ENV['BBORM_USERNAME'] = 'root';
+$_ENV['BBORM_PASSWORD'] = 'password';
+$_ENV['BBORM_DATABASE'] = 'test';
+$_ENV['BBORM_HOSTNAME'] = '127.0.0.1';
 ```
 
 ### Writing Your First Model 
@@ -339,14 +343,9 @@ You can also define query classes for representation.
 ### More Information
 Fore more information, you can read the unit tests (for now).
 
-# Tests
 
-I have tested with php 7.2.2 and 7.4. You can run tests in your environment. 
 
-# Dev
-Development project is containerized via docker. You can checkout the dev branch and run tests in your environment. 
-
-#Licence
+# Licence
 
 @Copyright 2020 Bahadır Birsöz <bahadirbirsoz@gmail.com>
 
