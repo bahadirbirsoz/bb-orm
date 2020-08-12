@@ -19,7 +19,9 @@
             "email": "bahadirbirsoz@gmail.com"
         }
     ],
-    "require": {},
+    "require": {
+        "php": "^7.2"
+    },
     "autoload": {
         "psr-4": {"BbOrm\\": "src/"}
     },
