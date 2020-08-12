@@ -1,5 +1,8 @@
 # bb-orm
-A simple lightweight ORM Library for PHP Projects. 
+A simple lightweight ORM Library for PHP Projects.
+
+### PHPUnit Code Coverage
+https://bb-orm.bahadirbirsoz.com/coverage 
 
 # Getting Started
 
@@ -310,7 +313,8 @@ left join category
 
 You can also define query classes for representation.
 
-
+### More Information
+Fore more information, you can read the unit tests (for now).
 
 # Tests
 
