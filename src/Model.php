@@ -2,27 +2,38 @@
 
 namespace BbOrm;
 
+use BbOrm\Exceptions\AccessViolationException;
+use BbOrm\Exceptions\InsertFailedException;
+use BbOrm\Exceptions\UnknownPropertyException;
+use BbOrm\Exceptions\UpdateFailedException;
+
 class Model
 {
 
     public function __get($name)
     {
-        if (isset($this->$name)) {
-            return $this->$name;
+        $methodName = "get" . ucfirst(SyntaxHelper::snakeToCamel($name));
+        if (method_exists($this, $methodName)) {
+            return $this->$methodName();
         }
-        return null;
+        if (property_exists($this, $name)) {
+            throw new AccessViolationException();
+        }
+        throw new UnknownPropertyException($name);
     }
 
     public function __set($name, $val)
     {
         $methodName = "set" . ucfirst(SyntaxHelper::snakeToCamel($name));
         if (method_exists($this, $methodName)) {
-            $this->$methodName($val);
-        } else {
-            $this->$name = $val;
+            return $this->$methodName($val);
         }
-        return $this;
+        if (property_exists($this, $name)) {
+            throw new AccessViolationException();
+        }
+        throw new UnknownPropertyException($name);
     }
+
 
     public static function getTable()
     {
@@ -38,20 +49,36 @@ class Model
             return static::find([
                 $key => $arguments[0]
             ]);
-        }
-        if (substr($name, 0, 9) == "findOneBy") {
+        } elseif (substr($name, 0, 9) == "findOneBy") {
             $key = SyntaxHelper::camelToSnake(substr($name, 9));
             return static::findOne([
                 $key => $arguments[0]
             ]);
+        } elseif (substr($name, 0, 9) == "findMapOf") {
+            $key = SyntaxHelper::camelToSnake(substr($name, 9));
+            return static::findMapOf($key);
+        } else {
+            throw new \BadMethodCallException();
         }
     }
 
 
+    public static function findMapOf($propertyName, $where = [], $order = [], $group = [], $limit = [])
+    {
+        $query = "select `" . static::getPK() . "`,`" . $propertyName . "` from " . static::getTable() . " ";
+        return static::select($query, $where, $order, $group, $limit, \PDO::FETCH_CLASS, get_called_class());
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row[0]] = $row[1];
+        }
+        return $result;
+
+    }
+
     public static function getPK()
     {
         return 'id';
-        //return static::getTable() . "_id";
     }
 
     public static function where($data)
@@ -72,7 +99,7 @@ class Model
         if (count($arr) == 0) {
             return "";
         }
-        return " ORDER BY " . implode(",", $arr);
+        return " ORDER BY " . implode(",", $arr) . ' ';
 
     }
 
@@ -81,7 +108,7 @@ class Model
         if (count($arr) == 0) {
             return "";
         }
-        return " GROUP BY " . implode(",", $arr);
+        return " GROUP BY " . implode(",", $arr) . ' ';
 
     }
 
@@ -90,109 +117,81 @@ class Model
         if (count($arr) == 0) {
             return "";
         }
-        return " LIMIT " . implode(",", $arr);
+        return " LIMIT " . implode(",", $arr) . ' ';
     }
 
-    public static function count($data = [], $order = [], $limit = [])
+    public static function count($where = [], $order = [], $group = [], $limit = [])
     {
-        if (is_numeric($data)) {
-            return static::findById($data);
-        }
-        $sql = "SELECT count(*) as c FROM `" . static::getTable() . "` " . static::where($data) . static::order($order) . static::limit($limit);
-
-        $sth = static::getConnection()->prepare($sql);
-        $sth->execute(static::conditions($data));
-        $result = $sth->fetchAll(\PDO::FETCH_ASSOC);
-        return (int)$result[0]['c'];
+        $query = "select count(*) as c from `" . static::getTable() . "` ";
+        $result = static::select($query, $where, $order, $group, $limit, \PDO::FETCH_NUM);
+        return (int)$result[0][0];
     }
 
     /**
      * @param array $data
      * @return static[]
      */
-    public static function find($data = [], $order = [], $limit = [])
+    public static function find($where = [], $order = [], $group = [], $limit = [], $fetchMethod = \PDO::FETCH_CLASS)
     {
-        if (is_numeric($data)) {
-            return static::findById($data);
+        if (is_numeric($where)) {
+            return static::findOneById($where);
         }
-        $sql = "SELECT * FROM `" . static::getTable() . "` " . static::where($data) . static::order($order) . static::limit($limit);
 
-        $sth = static::getConnection()->prepare($sql);
-        $sth->execute(static::conditions($data));
-        return $sth->fetchAll(\PDO::FETCH_CLASS, get_called_class());
+        return static::select(static::getTable(), $where, $order, $group, $limit, \PDO::FETCH_CLASS, get_called_class());
     }
 
     public static function raw($query)
     {
-        $sth = static::getConnection()->prepare($query);
-        $sth->execute();
+        $sth = static::getPdoConnection()->prepare($query);
+        $sth->execute([]);
         return $sth->fetchAll();
     }
 
-    public static function select($table, $data = [], $order = [], $group = [], $limit = [], $fetchMethod = \PDO::FETCH_CLASS)
+    public static function select($tableNameOrSelectPartOfQuery, $where = [], $order = [], $group = [], $limit = [], $fetchMethod = \PDO::FETCH_CLASS, $rowClass = null)
     {
-        if (is_array($table)) {
-            $data = $table;
-            $table = static::getTable();
+        if ($rowClass == null) {
+            $rowClass = get_called_class();
         }
-
-        if (stristr(trim($table), "select ")) {
-            $sql = $table . " " . static::where($data) . static::group($group) . static::order($order) . static::limit($limit);
+        if (stristr(trim($tableNameOrSelectPartOfQuery), "select")) {
+            $sql = $tableNameOrSelectPartOfQuery . " " . static::where($where) . static::group($group) . static::order($order) . static::limit($limit);
         } else {
-            $sql = "SELECT * FROM `" . $table . "` " . static::where($data) . static::group($group) . static::order($order) . static::limit($limit);
+            $sql = "SELECT * FROM `" . $tableNameOrSelectPartOfQuery . "` " . static::where($where) . static::group($group) . static::order($order) . static::limit($limit);
         }
-        $sth = static::getConnection()->prepare($sql);
 
-        $sth->execute(static::conditions($data));
-        return $sth->fetchAll($fetchMethod, get_called_class());
+        $sth = static::getPdoConnection()->prepare($sql);
+
+        $sth->execute(static::conditions($where));
+        if ($fetchMethod == \PDO::FETCH_CLASS) {
+            return $sth->fetchAll($fetchMethod, $rowClass);
+        } else {
+            return $sth->fetchAll($fetchMethod);
+        }
     }
 
-    public static function selectMap($table, $data = [], $order = [], $group = [])
+    public static function conditions($where = [])
     {
-        $data = static::select($table, $data, $order, $group, \PDO::FETCH_ASSOC);
-        if (count($data) == 0) {
+        if (!count($where)) {
             return [];
         }
-        $keys = array_keys($data[0]);
-        $result = [];
-        foreach ($data as $row) {
-            $result[$row[$keys[0]]] = $row[$keys[1]];
-        }
-        return $result;
-    }
-
-    public static function conditions($data = [])
-    {
-        if (!count($data)) {
-            return [];
-        }
-
-        if (array_key_exists("bind", $data)) {
-            return $data['bind'];
+        if (array_key_exists("bind", $where)) {
+            return $where['bind'];
         }
         $bind = [];
-        foreach ($data as $key => $val) {
-
+        foreach ($where as $key => $val) {
             $bind[] = $val;
         }
         return $bind;
     }
 
 
-    public static function findOne($data = [])
+    public static function findOne($data = [], $order = [])
     {
-        $arr = static::find($data);
+        $arr = static::find($data, $order);
         if (!$arr) {
             return false;
         }
         return $arr[0];
     }
-
-    public static function findById($id)
-    {
-        return self::findOne([static::getPK() => $id]);
-    }
-
 
     private function insertQueryString($data)
     {
@@ -225,24 +224,44 @@ class Model
         return $update;
     }
 
-    public function save()
+    public function save($data = null)
     {
         if (!isset($this->{static::getPK()})) {
-            return $this->insert();
+            return $this->create($data);
         }
 
-        $currentRec = static::findById($this->{static::getPK()});
+        $currentRec = static::findOneById($this->{static::getPK()});
         if ($currentRec) {
-            return $this->update();
+            return $this->update($data);
         } else {
-            return $this->insert();
+            return $this->create($data);
         }
     }
 
 
+    public static function updateRow($data)
+    {
+        $connection = static::getPdoConnection();
+        $sql = self::updateQueryString($data);
+
+        $sth = $connection->prepare($sql);
+
+        if ($sth->execute($data) === false) {
+            $err = $sth->errorInfo();
+            if ($connection->inTransaction()) {
+                $connection->rollBack();
+            }
+            throw new UpdateFailedException($err[2]);
+        }
+    }
+
     private function update()
     {
-
+        $connection = static::getPdoConnection();
+        $alreadyInTransaction = $connection->inTransaction();
+        if (!$alreadyInTransaction) {
+            $connection->beginTransaction();
+        }
         if (method_exists($this, 'beforeSave')) {
             $this->beforeSave();
         }
@@ -251,13 +270,7 @@ class Model
         }
 
         $data = get_object_vars($this);
-        $sql = self::updateQueryString($data);
-
-        $sth = static::getConnection()->prepare($sql);
-
-        if ($sth->execute($data) === false) {
-            return false;
-        }
+        static::updateRow($data);
 
         if (method_exists($this, 'afterUpdate')) {
             $this->afterUpdate();
@@ -265,35 +278,55 @@ class Model
         if (method_exists($this, 'afterSave')) {
             $this->afterSave();
         }
-
+        if (!$alreadyInTransaction) {
+            $connection->commit();
+        }
         return true;
     }
 
-    public function insert()
+    public static function createRow($data)
     {
+        $connection = static::getPdoConnection();
+        $sql = self::insertQueryString($data);
+        $sth = $connection->prepare($sql);
+        if ($sth->execute($data) === false) {
+            $err = $sth->errorInfo();
+            if ($connection->inTransaction()) {
+                $connection->rollBack();
+            }
+            throw new InsertFailedException($err[2]);
+        }
+    }
+
+    public function create()
+    {
+
+        $connection = static::getPdoConnection();
+        $alreadyInTransaction = $connection->inTransaction();
+
+        if (!$alreadyInTransaction) {
+            $connection->beginTransaction();
+        }
         if (method_exists($this, 'beforeSave')) {
             $this->beforeSave();
         }
-        if (method_exists($this, 'beforeInsert')) {
-            $this->beforeInsert();
+        if (method_exists($this, 'beforeCreate')) {
+            $this->beforeCreate();
         }
 
-        $data = get_object_vars($this);
-        $sql = self::insertQueryString($data);
-        $sth = static::getConnection()->prepare($sql);
-        if ($sth->execute($data) === false) {
-            return false;
-        }
-        $this->{static::getPK()} = static::getConnection()->lastInsertId();
+        static::createRow(get_object_vars($this));
 
+        $this->{static::getPK()} = $connection->lastInsertId();
 
-        if (method_exists($this, 'afterInsert')) {
-            $this->afterInsert();
+        if (method_exists($this, 'afterCreate')) {
+            $this->afterCreate();
         }
         if (method_exists($this, 'afterSave')) {
             $this->afterSave();
         }
-
+        if (!$alreadyInTransaction) {
+            $connection->commit();
+        }
         return true;
     }
 
@@ -314,7 +347,7 @@ class Model
         }
         $sql = "DELETE FROM " . static::getTable() . " " . static::where($data);
 
-        $sth = static::getConnection()->prepare($sql);
+        $sth = static::getPdoConnection()->prepare($sql);
         $sth->execute(static::conditions($data));
         $count = $sth->rowCount();
         return $count > 0;
@@ -323,7 +356,7 @@ class Model
     /**
      * @return \PDO
      */
-    public static function getConnection()
+    public static function getPdoConnection()
     {
         return Connection::getInstance()->getConnection();
     }

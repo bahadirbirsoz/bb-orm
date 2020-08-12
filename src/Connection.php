@@ -2,6 +2,8 @@
 
 namespace BbOrm;
 
+use BbOrm\Exceptions\DatabaseLockedException;
+
 class Connection
 {
 
@@ -23,9 +25,7 @@ class Connection
 
     protected function __construct($host, $db, $user, $pass)
     {
-        if (!$this->locked) {
-            $this->conn = new \PDO('mysql:host=' . $host . ';dbname=' . $db . ";charset=utf8", $user, $pass);
-        }
+        $this->conn = new \PDO('mysql:host=' . $host . ';dbname=' . $db . ";charset=utf8", $user, $pass);
     }
 
     /**
@@ -33,9 +33,10 @@ class Connection
      */
     public function getConnection()
     {
-        if (!$this->locked) {
-            return $this->conn;
+        if ($this->locked) {
+            throw new DatabaseLockedException();
         }
+        return $this->conn;
     }
 
     public static function getInstance()

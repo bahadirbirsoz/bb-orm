@@ -62,6 +62,8 @@ ADD tests tests
 
 RUN composer install
 
+RUN pecl install xdebug
+COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 RUN chmod +x $PWD/vendor/bin/*
 

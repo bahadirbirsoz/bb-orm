@@ -3,7 +3,8 @@
     "description": "Simple, lightweight ORM tool for PHP Projects. Inpried by Phalcon ORM and comes with a CLI tool to autogenerate models.",
     "type": "library",
     "require-dev": {
-        "phpunit/phpunit": "^8.5"
+        "phpunit/phpunit": "^8.5",
+        "fzaninotto/faker": "^1.9"
     },
     "repositories": [
         {
