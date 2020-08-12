@@ -6,9 +6,15 @@ https://bb-orm.bahadirbirsoz.com
 
 ### PHPUnit Code Coverage
 https://bb-orm.bahadirbirsoz.com/coverage 
+### Installation
+````
+composer require bahadirbirsoz/bb-orm
+````
 
-### Run Tests
+### To contribute and test
 ```
+git clone https://github.com/bahadirbirsoz/bb-orm
+cd bb-orm
 docker-compose build
 docker-compose run bborm
 ```
