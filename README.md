@@ -1,10 +1,27 @@
 # bb-orm
 A simple lightweight ORM Library for PHP Projects.
 
+### Project Page
+https://bb-orm.bahadirbirsoz.com 
+
 ### PHPUnit Code Coverage
 https://bb-orm.bahadirbirsoz.com/coverage 
 
+### Run Tests
+```
+docker-compose build
+docker-compose run bborm
+```
+
 # Getting Started
+
+### Configuration
+```
+    $_ENV['BBORM_USERNAME'] = 'root';
+    $_ENV['BBORM_PASSWORD'] = 'password';
+    $_ENV['BBORM_DATABASE'] = 'test';
+    $_ENV['BBORM_HOSTNAME'] = '127.0.0.1';
+```
 
 ### Writing Your First Model 
 ```
@@ -15,7 +32,7 @@ class Category extends \BbOrm\Model
     public $sorting;
 }
 ```
-- Models are supposed to extended from `\BbOrm\Model` class. 
+- Models are supposed to be extended from `\BbOrm\Model` class. 
 - `snake_case` representation of `PascalCaseModelName` is assumed to be table name. Can be overwritten via `::getTable` method.
 - `$id` is assumed to be the primary key in each table. Can be overwritten via `::getPK` method.  
 - Every table must have one and only one primary key.
