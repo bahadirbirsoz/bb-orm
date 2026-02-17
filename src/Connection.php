@@ -6,11 +6,10 @@ use BbOrm\Exceptions\DatabaseLockedException;
 
 class Connection
 {
-
     /**
-     * @var Connection
+     * @var Connection|null
      */
-    static $instance;
+    private static $instance = null;
 
     /**
      * @var \PDO
@@ -20,16 +19,15 @@ class Connection
     private $locked = false;
 
     /**
-     * @return Connection
+     * @return void
      */
-
     protected function __construct($host, $db, $user, $pass)
     {
         $this->conn = new \PDO('mysql:host=' . $host . ';dbname=' . $db . ";charset=utf8", $user, $pass);
     }
 
     /**
-     * @return PDO
+     * @return \PDO
      */
     public function getConnection()
     {
@@ -46,7 +44,8 @@ class Connection
                 $_ENV['BBORM_HOSTNAME'],
                 $_ENV['BBORM_DATABASE'],
                 $_ENV['BBORM_USERNAME'],
-                $_ENV['BBORM_PASSWORD']);
+                $_ENV['BBORM_PASSWORD']
+            );
         }
         return static::$instance;
     }
@@ -56,5 +55,8 @@ class Connection
         $this->locked = true;
     }
 
+    public static function resetInstance()
+    {
+        static::$instance = null;
+    }
 }
-

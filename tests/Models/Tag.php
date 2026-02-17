@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Models;
-
 
 use BbOrm\EventHandlers\AfterCreate;
 use BbOrm\EventHandlers\AfterSave;
@@ -46,5 +44,4 @@ class Tag extends Model implements AfterCreate, AfterSave, AfterUpdate, BeforeSa
         $event->event = 'afterSave';
         $event->save();
     }
-
 }

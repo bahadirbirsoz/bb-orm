@@ -1,11 +1,9 @@
 <?php
 
-
 namespace BbOrm;
 
 class DataRow extends Model
 {
-
     public function __set($name, $val)
     {
         $methodName = "set" . ucfirst(SyntaxHelper::snakeToCamel($name));
@@ -15,5 +13,4 @@ class DataRow extends Model
             $this->$name = $val;
         }
     }
-
 }

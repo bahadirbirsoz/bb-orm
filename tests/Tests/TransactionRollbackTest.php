@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Tests;
-
 
 use BbOrm\Connection;
 use BbOrm\Exceptions\InsertFailedException;
@@ -14,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 
 class TransactionRollbackTest extends TestCase
 {
-
     public function testRollbackOnCreate()
     {
         TestCaseSceneryFactory::cleanDatabase();
@@ -26,7 +23,6 @@ class TransactionRollbackTest extends TestCase
         $this->expectException(InsertFailedException::class);
         Tag::createRow(['unknown_parameter' => 'some value']);
         $this->assertCount(0, Tag::find());
-
     }
 
     public function testRollbackOnUpdate()
@@ -43,7 +39,5 @@ class TransactionRollbackTest extends TestCase
         Tag::updateRow(['id' => $tag->id, 'unknown_parameter' => 'some value']);
 
         $this->assertCount(1, Tag::find());
-
     }
-
 }

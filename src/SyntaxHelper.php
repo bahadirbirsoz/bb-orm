@@ -4,9 +4,6 @@ namespace BbOrm;
 
 class SyntaxHelper
 {
-
-
-
     public static function snakeToCamel($str)
     {
         return lcfirst(strtr(ucwords(strtr($str, ['_' => ' '])), [' ' => '']));
@@ -22,6 +19,4 @@ class SyntaxHelper
         }
         return implode('_', $ret);
     }
-
-
 }

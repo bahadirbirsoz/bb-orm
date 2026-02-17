@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="BB-ORM Standard" xsi:noNamespaceSchemaLocation="phpcs.xsd">
+    <description>The coding standard for BB-ORM.</description>
+
+    <file>src</file>
+    <file>tests</file>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg name="parallel" value="75"/>
+    <arg value="p"/>
+
+    <!-- Use the PSR12 Standard-->
+    <rule ref="PSR12"/>
+
+    <!-- Allow short arrays (PSR12 allows, but some older setups might prefer) -->
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+</ruleset>

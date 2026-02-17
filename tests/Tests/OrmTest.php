@@ -15,7 +15,6 @@ use BbOrm\Test\Models\TagEventLog;
 
 class OrmTest extends OrmTestCase
 {
-
     public function testKeyToDataFetching()
     {
         TestCaseSceneryFactory::cleanDatabase();
@@ -94,8 +93,5 @@ class OrmTest extends OrmTestCase
         $this->assertEquals(1, Category::count(['id' => $category->id]));
         $category->remove();
         $this->assertEquals(0, Category::count(['id' => $category->id]));
-
     }
-
-
 }

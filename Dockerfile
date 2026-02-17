@@ -1,4 +1,4 @@
-FROM php:7.4-fpm
+FROM php:8.4-fpm
 
 LABEL maintainer="Bahadır Birsöz <github.com/bahadirbirsoz>"
 
@@ -11,7 +11,10 @@ RUN apt-get install -y unzip
 RUN docker-php-ext-install gd
 RUN docker-php-ext-install pdo pdo_mysql
 RUN apt-get install git -y
-RUN pecl install xdebug
+# Xdebug installation might need to be adjusted for PHP 8.4 compatibility or pre-compiled extension
+# Trying pecl install xdebug first as it's the standard way
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
 WORKDIR /app
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -24,7 +27,7 @@ COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 ADD src src
 ADD tests tests
 
-RUN composer install
+RUN composer install --no-interaction --optimize-autoloader
 
 RUN chmod +x $PWD/vendor/bin/*
 

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Tests;
-
 
 use BbOrm\DataRow;
 use BbOrm\Model;
@@ -13,7 +11,6 @@ use PHPUnit\Framework\TestCase;
 
 class CustomQueryTest extends TestCase
 {
-
     public function testLimit()
     {
         TestCaseSceneryFactory::cleanDatabase();
@@ -22,7 +19,6 @@ class CustomQueryTest extends TestCase
         TestCaseSceneryFactory::createCategories($createCount);
         $items = Category::find([], [], [], [0, $limitCount]);
         $this->assertCount($limitCount, $items);
-
     }
 
     public function testCount()
@@ -42,7 +38,8 @@ class CustomQueryTest extends TestCase
         $ordered = Tag::find([], ['tag']);
         $this->assertCount(count($unordered), $ordered);
 
-        usort($unordered,
+        usort(
+            $unordered,
             function ($a, $b) {
                 return strcmp($a->tag, $b->tag);
             }
@@ -88,7 +85,4 @@ left join category
         $this->assertIsArray($rows);
         $this->assertGreaterThan(10, $rows);
     }
-
-
-
 }
