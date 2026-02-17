@@ -13,7 +13,7 @@ cd bb-orm
 docker-compose build
 docker-compose run bborm
 ```
-I have tested with php 7.2.2 and 7.4. You can run tests in your environment.
+This project requires PHP 8.3 or higher. Testing is done with PHP 8.4. You can run tests in your environment using Docker.
 
 ### Code Coverage
 https://bb-orm.bahadirbirsoz.com/coverage
