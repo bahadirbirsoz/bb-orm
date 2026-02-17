@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Models;
-
 
 use BbOrm\EventHandlers\BeforeCreate;
 use BbOrm\EventHandlers\BeforeUpdate;
@@ -15,7 +13,6 @@ use BbOrm\Model;
  */
 class Post extends Model implements BeforeCreate, BeforeUpdate
 {
-
     public $id;
     protected $title;
     protected $url;
@@ -24,7 +21,8 @@ class Post extends Model implements BeforeCreate, BeforeUpdate
     public $created_at;
     public $updated_at;
 
-    public function getVirtualProperty(){
+    public function getVirtualProperty()
+    {
         return "computed or formatted value";
     }
 
@@ -39,14 +37,15 @@ class Post extends Model implements BeforeCreate, BeforeUpdate
     }
 
 
-    public function setTitle($title){
+    public function setTitle($title)
+    {
         $this->title = $title;
         $url = preg_replace('/[^\w\-]+/u', '-', $title);
         $this->url = mb_strtolower(preg_replace('/--+/u', '-', $url), 'UTF-8');
     }
 
-    public function getTitle(){
+    public function getTitle()
+    {
         return $this->title;
     }
-
 }

@@ -9,7 +9,6 @@ use BbOrm\Exceptions\UpdateFailedException;
 
 class Model
 {
-
     public function __get($name)
     {
         $methodName = "get" . ucfirst(SyntaxHelper::snakeToCamel($name));
@@ -67,13 +66,6 @@ class Model
     {
         $query = "select `" . static::getPK() . "`,`" . $propertyName . "` from " . static::getTable() . " ";
         return static::select($query, $where, $order, $group, $limit, \PDO::FETCH_CLASS, get_called_class());
-
-        $result = [];
-        foreach ($rows as $row) {
-            $result[$row[0]] = $row[1];
-        }
-        return $result;
-
     }
 
     public static function getPK()
@@ -100,7 +92,6 @@ class Model
             return "";
         }
         return " ORDER BY " . implode(",", $arr) . ' ';
-
     }
 
     public static function group($arr)
@@ -109,7 +100,6 @@ class Model
             return "";
         }
         return " GROUP BY " . implode(",", $arr) . ' ';
-
     }
 
     public static function limit($arr)
@@ -131,13 +121,26 @@ class Model
      * @param array $data
      * @return static[]
      */
-    public static function find($where = [], $order = [], $group = [], $limit = [], $fetchMethod = \PDO::FETCH_CLASS)
-    {
+    public static function find(
+        $where = [],
+        $order = [],
+        $group = [],
+        $limit = [],
+        $fetchMethod = \PDO::FETCH_CLASS
+    ) {
         if (is_numeric($where)) {
             return static::findOneById($where);
         }
 
-        return static::select(static::getTable(), $where, $order, $group, $limit, \PDO::FETCH_CLASS, get_called_class());
+        return static::select(
+            static::getTable(),
+            $where,
+            $order,
+            $group,
+            $limit,
+            $fetchMethod,
+            get_called_class()
+        );
     }
 
     public static function raw($query)
@@ -147,15 +150,24 @@ class Model
         return $sth->fetchAll();
     }
 
-    public static function select($tableNameOrSelectPartOfQuery, $where = [], $order = [], $group = [], $limit = [], $fetchMethod = \PDO::FETCH_CLASS, $rowClass = null)
-    {
+    public static function select(
+        $tableNameOrSelectPartOfQuery,
+        $where = [],
+        $order = [],
+        $group = [],
+        $limit = [],
+        $fetchMethod = \PDO::FETCH_CLASS,
+        $rowClass = null
+    ) {
         if ($rowClass == null) {
             $rowClass = get_called_class();
         }
         if (stristr(trim($tableNameOrSelectPartOfQuery), "select")) {
-            $sql = $tableNameOrSelectPartOfQuery . " " . static::where($where) . static::group($group) . static::order($order) . static::limit($limit);
+            $sql = $tableNameOrSelectPartOfQuery . " " . static::where($where) . static::group($group) .
+                static::order($order) . static::limit($limit);
         } else {
-            $sql = "SELECT * FROM `" . $tableNameOrSelectPartOfQuery . "` " . static::where($where) . static::group($group) . static::order($order) . static::limit($limit);
+            $sql = "SELECT * FROM `" . $tableNameOrSelectPartOfQuery . "` " . static::where($where) .
+                static::group($group) . static::order($order) . static::limit($limit);
         }
 
         $sth = static::getPdoConnection()->prepare($sql);
@@ -177,7 +189,7 @@ class Model
             return $where['bind'];
         }
         $bind = [];
-        foreach ($where as $key => $val) {
+        foreach ($where as $val) {
             $bind[] = $val;
         }
         return $bind;
@@ -196,7 +208,8 @@ class Model
     private static function insertQueryString($data)
     {
         $keys = array_keys($data);
-        return "INSERT INTO `" . static::getTable() . "` " . static::getInsertCols($keys) . " VALUES " . static::getInsertValues($keys);
+        return "INSERT INTO `" . static::getTable() . "` " . static::getInsertCols($keys) .
+            " VALUES " . static::getInsertValues($keys);
     }
 
     private static function getInsertCols($keys)
@@ -217,24 +230,26 @@ class Model
         $update = "UPDATE `" . static::getTable() . "` SET ";
 
         foreach ($keys as $key) {
-            $update .= "`$key`=:$key ,";
+            /** @psalm-suppress InvalidCast */
+            $keyStr = (string)$key;
+            $update .= "`$keyStr`=:$keyStr ,";
         }
         $update = rtrim($update, ",");
         $update .= " WHERE `$pk` = :$pk ";
         return $update;
     }
 
-    public function save($data = null)
+    public function save()
     {
         if (!isset($this->{static::getPK()})) {
-            return $this->create($data);
+            return $this->create();
         }
 
         $currentRec = static::findOneById($this->{static::getPK()});
         if ($currentRec) {
-            return $this->update($data);
+            return $this->update();
         } else {
-            return $this->create($data);
+            return $this->create();
         }
     }
 
@@ -251,7 +266,7 @@ class Model
             if ($connection->inTransaction()) {
                 $connection->rollBack();
             }
-            throw new UpdateFailedException($err[2]);
+            throw new UpdateFailedException($err[2] ?? 'Unknown error');
         }
     }
 
@@ -294,7 +309,7 @@ class Model
             if ($connection->inTransaction()) {
                 $connection->rollBack();
             }
-            throw new InsertFailedException($err[2]);
+            throw new InsertFailedException($err[2] ?? 'Unknown error');
         }
     }
 
@@ -360,8 +375,4 @@ class Model
     {
         return Connection::getInstance()->getConnection();
     }
-
-
 }
-
-

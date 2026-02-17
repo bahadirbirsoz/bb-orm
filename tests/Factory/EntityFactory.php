@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Factory;
-
 
 use BbOrm\Test\Models\Category;
 use BbOrm\Test\Models\Post;
@@ -11,12 +9,10 @@ use BbOrm\Test\Models\Tag;
 
 class EntityFactory
 {
-
-
     /**
      * @return Category
      */
-    static function category(): Category
+    public static function category(): Category
     {
         $category = FabricationFactory::category();
         $category->save();
@@ -27,10 +23,10 @@ class EntityFactory
     /**
      * @return Post
      */
-    static function post($categoryId = null): Post
+    public static function post($categoryId = null): Post
     {
         $post = FabricationFactory::post();
-        if(!null){
+        if (!null) {
             $post->category_id = $categoryId;
         }
         $post->save();
@@ -39,7 +35,7 @@ class EntityFactory
     /**
      * @return PostTag
      */
-    static function postTag($postId,$tagId): PostTag
+    public static function postTag($postId, $tagId): PostTag
     {
         $postTag = new PostTag();
         $postTag->post_id = $postId;
@@ -51,14 +47,10 @@ class EntityFactory
     /**
      * @return Tag
      */
-    static function tag(): Tag
+    public static function tag(): Tag
     {
         $tag = FabricationFactory::tag();
         $tag->save();
         return $tag;
     }
-
-
-
-
 }

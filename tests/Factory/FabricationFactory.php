@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Factory;
-
 
 use BbOrm\Test\Models\Category;
 use BbOrm\Test\Models\Post;
@@ -10,11 +8,10 @@ use BbOrm\Test\Models\Tag;
 
 class FabricationFactory
 {
-
     /**
      * @return Tag
      */
-    static function tag():Tag
+    public static function tag(): Tag
     {
         $faker = \Faker\Factory::create();
         $tag = new Tag();
@@ -25,7 +22,7 @@ class FabricationFactory
     /**
      * @return Category
      */
-    static function category():Category
+    public static function category(): Category
     {
         $faker = \Faker\Factory::create();
         $cat = new Category();
@@ -36,7 +33,7 @@ class FabricationFactory
     /**
      * @return Post
      */
-    static function post():Post
+    public static function post(): Post
     {
         $faker = \Faker\Factory::create();
         $post = new Post();

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Tests;
-
 
 use BbOrm\Exceptions\UnknownPropertyException;
 use BbOrm\Test\Factory\EntityFactory;
@@ -14,9 +12,10 @@ use PHPUnit\Framework\TestCase;
 
 class MagicMethodsTest extends TestCase
 {
-    public function testVirtualPropertyGetter(){
+    public function testVirtualPropertyGetter()
+    {
         $post = FabricationFactory::post();
-        $this->assertEquals("computed or formatted value",$post->virtualProperty);
+        $this->assertEquals("computed or formatted value", $post->virtualProperty);
     }
 
     public function testFindByMagicMethod()
@@ -40,7 +39,4 @@ class MagicMethodsTest extends TestCase
             json_encode($expected)
         );
     }
-
-
-
 }

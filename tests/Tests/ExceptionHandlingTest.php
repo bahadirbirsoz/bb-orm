@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Tests;
-
 
 use BbOrm\Connection;
 use BbOrm\Exceptions\AccessViolationException;
@@ -106,6 +104,4 @@ class ExceptionHandlingTest extends TestCase
         $this->expectException(InsertFailedException::class);
         Category::createRow(['some_prop' => 'does not exist']);
     }
-
-
 }

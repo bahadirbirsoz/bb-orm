@@ -9,7 +9,6 @@ use PHPUnit\Framework\TestCase;
 
 class ConnectionTest extends TestCase
 {
-
     public function testCanCreateValidConnectionObject()
     {
         $bbConnection = Connection::getInstance();
@@ -22,5 +21,4 @@ class ConnectionTest extends TestCase
         $rawQuery = Model::raw("SELECT  NOW() as `ts` ");
         $this->assertEquals(date("Y-m-d H:i:s"), $rawQuery[0]['ts']);
     }
-
 }

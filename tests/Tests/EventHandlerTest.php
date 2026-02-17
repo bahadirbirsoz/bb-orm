@@ -1,8 +1,6 @@
 <?php
 
-
 namespace BbOrm\Test\Tests;
-
 
 use BbOrm\Test\Factory\EntityFactory;
 use BbOrm\Test\Factory\FabricationFactory;
@@ -12,7 +10,6 @@ use PHPUnit\Framework\TestCase;
 
 class EventHandlerTest extends TestCase
 {
-
     public function testAfterSaveAndAfterUpdateEvent()
     {
         TestCaseSceneryFactory::resetDatabase();
@@ -33,7 +30,6 @@ class EventHandlerTest extends TestCase
             "tag_id" => $tag->id,
             'event' => 'afterUpdate'
         ]));
-
     }
 
     public function testAfterSaveAndAfterCreateEvent()
@@ -61,9 +57,9 @@ class EventHandlerTest extends TestCase
         $overwriteString = "shall be overwritten";
         $tag->saved_at = $overwriteString;
 
-        $this->assertSame($tag->saved_at,$overwriteString);
+        $this->assertSame($tag->saved_at, $overwriteString);
         $tag->save();
-        $this->assertNotSame($tag->saved_at,$overwriteString);
+        $this->assertNotSame($tag->saved_at, $overwriteString);
     }
 
     public function testBeforeCreateEvent()
@@ -85,6 +81,4 @@ class EventHandlerTest extends TestCase
         $post->save();
         $this->assertIsString($post->updated_at);
     }
-
-
 }
